@@ -1,5 +1,5 @@
 # Torre de Hanói
-Projeto da cadeira de Organização de Computadores e Sistemas Operacionais, da graduação em Sistemas de Informação (SI) do Centro de Informática (CIN) da Universidade Federal de Pernambuco (UFPE), cadeira cursada pela equipe em 2023 e 2024. O projeto consiste em fazer uma Torre de Hanói usando recursão em Assembly. A Torre de Hanói consiste em três hastes (pinos verticais) e um número de discos de tamanhos diferentes, empilhados em ordem decrescente de tamanho em uma haste, o objetivo é mover a pilha de discos de uma haste para outra seguindo algumas regras.
+Projeto da cadeira de Organização de Computadores e Sistemas Operacionais, da graduação em [Sistemas de Informação (SI)](https://portal.cin.ufpe.br/graduacao/sistemas-de-informacao/) do [Centro de Informática (CIN)](https://portal.cin.ufpe.br/) da [Universidade Federal de Pernambuco (UFPE)](https://www.ufpe.br/), cadeira cursada pela equipe em 2023 e 2024.. O projeto consiste em fazer uma Torre de Hanói usando recursão em Assembly. A Torre de Hanói consiste em três hastes (pinos verticais) e um número de discos de tamanhos diferentes, empilhados em ordem decrescente de tamanho em uma haste, o objetivo é mover a pilha de discos de uma haste para outra seguindo algumas regras.
 
 # Organização dos Arquivos
 
