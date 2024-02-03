@@ -1,3 +1,17 @@
+section .data
+    pergunta db 'Digite a quantidade de discos (1 a 99):', 0
+    movimento1 db 'Moveu um disco da coluna ', 0
+    movimento2 db ' até a coluna ', 0
+    concluido db 'Concluído!', 0
+    
+    newline db 10 ; Valor responsável por pular linhas na tabela ASCII
+    
+    global colunas
+    colunas:
+        db 'A'
+        db 'B'
+        db 'C'
+
 section .bss
     entrada resb 3  ; Buffer para armazenar a entrada do usuário (um ou dois dígitos + newline)
     quant_disc resb 1 ; Armazenamento do número de discos
@@ -6,10 +20,23 @@ section .text
     global _start
 
 _start:
+    mov ecx, pergunta ; Movendo a string para ecx
+    call printar_ecx_0 ; Printando o conteúdo de ecx, se for uma string
+
     mov ecx, entrada ; Ponteiro para o buffer de entrada
     call ler_3_2 ; Leitura do input do usuário que terá 3 bytes, mas só serão lidos 2
-
+   
+    ; Transformar de string pra inteiro
     call convert_string_to_int ; Faz a conversão e armazena em eax
+    mov [quant_disc], edx ; Move o valor de eax para a variável que será usada
+
+    mov ecx, concluido ; Mensagem: Concluído!
+    call printar_ecx_0 ; Printar o que está em ecx, desde que a string seja terminado com um 0
+
+    ; Sair do programa
+    mov eax, 1          ; Número da chamada de sistema para sair
+    xor ebx, ebx        ; Código de retorno 0
+    int 0x80            ; Chamar a interrupção do sistema
 
 printar_ecx: ; Imprimir a string que está em ecx
     mov eax, 4               ; Número da chamada de sistema para imprimir
