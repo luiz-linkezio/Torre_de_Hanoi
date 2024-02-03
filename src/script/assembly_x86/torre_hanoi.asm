@@ -3,6 +3,7 @@ section .data
     movimento1 db 'Moveu um disco da coluna ', 0
     movimento2 db ' até a coluna ', 0
     concluido db 'Concluído!', 0
+    entrada_invalida db 'Sua entrada não é válida, digite novamente.', 0
     
     newline db 10 ; Valor responsável por pular linhas na tabela ASCII
     
@@ -20,22 +21,25 @@ section .text
     global _start
 
 _start:
+    inicio:
     mov ecx, pergunta ; Movendo a string para ecx
     call printar_ecx_0 ; Printando o conteúdo de ecx, se for uma string
-
+    
     mov ecx, entrada ; Ponteiro para o buffer de entrada
     call ler_3_2 ; Leitura do input do usuário que terá 3 bytes, mas só serão lidos 2
-   
+        
+    call avaliar_entrada
+       
     ; Transformar de string pra inteiro
     call convert_string_to_int ; Faz a conversão e armazena em eax
     mov [quant_disc], edx ; Move o valor de eax para a variável que será usada
-
+    
     mov esi, 0 ; Declarando um valor que será usado na função "towerofhanoi"
     call towerofhanoi ; Função da torre de hanói
-
+    
     mov ecx, concluido ; Mensagem: Concluído!
     call printar_ecx_0 ; Printar o que está em ecx, desde que a string seja terminado com um 0
-
+    
     ; Sair do programa
     mov eax, 1          ; Número da chamada de sistema para sair
     xor ebx, ebx        ; Código de retorno 0
@@ -420,4 +424,44 @@ ler_3_2:             ; Ler a string do usuário que terá 3 bytes, mas só serã
     mov ebx, 0          ; Descritor de arquivo (stdin)
     mov edx, 2          ; Tamanho máximo de entrada
     int 0x80            ; Chamando Kernel 
-    ret                 ; Retorno03
+    ret                 ; Retorno
+    
+avaliar_entrada:     ; Verificar se a entrada é um número de até 2 algarismos maior que 0 (ainda em string)
+    mov cl, entrada[2] ; Move o terceiro caractere da entrada para o registrador cl
+    cmp cl, 0x0a ; Compara este caractere com o valor de newline da tabela ASCII
+    
+    jle quantidade_caracteres_valida ; Se for menor ou igual, a entrada não tem mais do que 2 algarismos e será considerada válida por enquanto, com o objetivo de verificar se é um caractere "vazio", para prevenir números maiores que 99 (2 algarismos)
+    
+    jmp invalido ; Caso seja maior, a entrada pode ter mais de 2 algarismos ou algum outro caractere inválido na terceira posição/espaço
+    
+    quantidade_caracteres_valida: ; Quantidade de caracteres válida
+    
+    mov al, entrada[0] ; Move o primeiro caractere da entrada para o registrador al
+    cmp al, 0x30 ; Compara este caractere com o valor na tabela ASCII do número 0 em formato de string 
+    jl invalido ; Se for menor, então significa que o que o usuário digitou não é um número, a entrada então será considerada inválida
+    cmp al, 0x39 ; Compara este caractere com o valor na tabela ASCII do número 9 em formato de string 
+    jg invalido ; Se for maior, então significa que o que o usuário digitou não é um número, a entrada então será considerada inválida
+    
+    mov dl, entrada[1] ; Move o segundo caractere da entrada para o registrador al
+    
+    cmp dl, 0x0a ; Comparar este caractere com o valor de newline na tabela ASCII, para verificar se o segundo caractere é um algarismo ou se é um newline, newline esta que é gerada pelo "ENTER" do usuário ao ter digitado apenas um algarismo
+    je um_algarismo_validacao ; Se o segundo caractere for newline, então só há um algarismo para analisar e não existe a necessidade de tratar um segundo caractere numérico 
+    
+    cmp dl, 0x30 ; Compara este caractere com o valor na tabela ASCII do número 0 em formato de string
+    jl invalido ; Se for menor, então significa que o que o usuário digitou não é um número, a entrada então será considerada inválida
+    cmp dl, 0x39 ; Compara este caractere com o valor na tabela ASCII do número 9 em formato de string
+    jg invalido ; Se for maior, então significa que o que o usuário digitou não é um número, a entrada então será considerada inválida
+    
+    um_algarismo_validacao:
+    
+    jmp valido ; Pula o tratamento de invalidez, porque se a execução chegou nesta linha, então a entrada é válida
+    invalido: 
+        mov ecx, entrada_invalida ; Move o conteúdo da string entrada_invalida para ecx
+        call printar_ecx_0 ; Chama a função para printar o conteúdo de ecx, desde que a string seja finalizada com um número inteiro 0
+        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
+        call printar_ecx ; Printar o que está em ecx
+        
+        jmp inicio ; Pula para o começo do código, onde o usuário terá que digitar uma nova entrada, já que sua última entrada foi inválida
+    
+    valido: 
+        ret ; Retorno
