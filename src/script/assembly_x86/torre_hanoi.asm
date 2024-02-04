@@ -1,18 +1,16 @@
 section .data
+    ; Strings que poderão ser usadas no código posteriormente
     pergunta db 'Digite a quantidade de discos (1 a 99):', 0
     movimento1 db 'Moveu um disco da coluna ', 0
     movimento2 db ' até a coluna ', 0
     concluido db 'Concluído!', 0
-    entrada_invalida db 'Sua entrada não é válida, digite novamente.', 0
+    entrada_invalida db 'Sua entrada é inválida, digite novamente.', 0
+    coluna_origem db 'A', 0
+    coluna_auxiliar db 'B', 0
+    coluna_destino db 'C', 0
     
     newline db 10 ; Valor responsável por pular linhas na tabela ASCII
     
-    global colunas
-    colunas:
-        db 'A'
-        db 'B'
-        db 'C'
-
 section .bss
     entrada resb 3  ; Buffer para armazenar a entrada do usuário (um ou dois dígitos + newline)
     quant_disc resb 1 ; Armazenamento do número de discos
@@ -28,13 +26,12 @@ _start:
     mov ecx, entrada ; Ponteiro para o buffer de entrada
     call ler_3_2 ; Leitura do input do usuário que terá 3 bytes, mas só serão lidos 2
         
-    call avaliar_entrada
+    call avaliar_entrada ; Verificar se a entrada é válida ou inválida. Se for inválida, o usuário terá que inserir uma nova entrada.
        
     ; Transformar de string pra inteiro
     call convert_string_to_int ; Faz a conversão e armazena em eax
     mov [quant_disc], edx ; Move o valor de eax para a variável que será usada
     
-    mov esi, 0 ; Declarando um valor que será usado na função "towerofhanoi"
     call towerofhanoi ; Função da torre de hanói
     
     mov ecx, concluido ; Mensagem: Concluído!
@@ -45,343 +42,77 @@ _start:
     xor ebx, ebx        ; Código de retorno 0
     int 0x80            ; Chamar a interrupção do sistema
     
-towerofhanoi:
-    ; Comparação dos valores de esi, para verificar qual a configuração atual das colunas, cada número de esi corresponde a uma configuração diferente
-    cmp esi, 0
-    je origem_auxiliar_destino
-    cmp esi, 1
-    je origem_destino_auxiliar
-    cmp esi, 2
-    je auxiliar_origem_destino
-    cmp esi, 3
-    je auxiliar_destino_origem
-    cmp esi, 4
-    je destino_origem_auxiliar
-    cmp esi, 5
-    je destino_auxiliar_origem
+towerofhanoi: ; Algoritmo da Torre de Hanói
+    cmp byte [quant_disc], 1 ; Comparando a quantidade de discos com 1
+    je disco_unico ; Caso tenha 1 disco apenas
+    jmp mais_discos ; Caso tenha mais de um disco
+    
+    disco_unico: ; Caso tenha 1 disco apenas
+        mov ecx, movimento1 ; Armazenar string em ecx
+        call printar_ecx_0 ; Printar o que está em ecx
+        
+        mov ecx, coluna_origem ; Move o valor da coluna origem para ecx
+        call printar_ecx_0 ; Printar o que está em ecx
+        
+        mov ecx, movimento2 ; Armazenar string em ecx
+        call printar_ecx_0 ; Printar o que está em ecx
+        
+        mov ecx, coluna_destino ; Move o valor da coluna destino para ecx
+        call printar_ecx_0 ; Printar o que está em ecx
+        
+        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
+        call printar_ecx ; Printar o que está em ecx
+        
+        jmp fim ; Ir para o final da função
+        
+    mais_discos: ; Caso tenha mais de um disco
+        dec byte [quant_disc] ; Decrescimento na quantidade de discos
+        
+        push word [quant_disc] ; Coloca o valor da quantidade atual de discos na pilha, para a primeira recursão e suas "filhas" não interferirem na chamada atual da função
 
-    ; O envio para a configuração de colunas correspondente
-    origem_auxiliar_destino:    
-        cmp byte [quant_disc], 1 ; Comparando a quantidade de discos com 1
-        je disco_unico_0 ; Caso tenha 1 disco apenas
-        jmp mais_discos_0 ; Caso tenha mais de um disco
-    origem_destino_auxiliar:
-        cmp byte [quant_disc], 1 ; Comparando a quantidade de discos com 1
-        je disco_unico_1 ; Caso tenha 1 disco apenas
-        jmp mais_discos_1 ; Caso tenha mais de um disco
-    auxiliar_origem_destino:
-        cmp byte [quant_disc], 1 ; Comparando a quantidade de discos com 1
-        je disco_unico_2 ; Caso tenha 1 disco apenas
-        jmp mais_discos_2 ; Caso tenha mais de um disco
-    auxiliar_destino_origem:
-        cmp byte [quant_disc], 1 ; Comparando a quantidade de discos com 1
-        je disco_unico_3 ; Caso tenha 1 disco apenas
-        jmp mais_discos_3 ; Caso tenha mais de um disco
-    destino_origem_auxiliar:
-        cmp byte [quant_disc], 1 ; Comparando a quantidade de discos com 1
-        je disco_unico_4 ; Caso tenha 1 disco apenas
-        jmp mais_discos_4 ; Caso tenha mais de um disco
-    destino_auxiliar_origem:
-        cmp byte [quant_disc], 1 ; Comparando a quantidade de discos com 1
-        je disco_unico_5 ; Caso tenha 1 disco apenas
-        jmp mais_discos_5 ; Caso tenha mais de um disco
-    
-    disco_unico_0: ; Caso tenha 1 disco apenas
-        mov ecx, movimento1 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
+        push word [coluna_origem] ; Coloca o valor de coluna origem na pilha, para as recursões futuras não influenciarem nos valores da chamada atual da função
+        push word [coluna_auxiliar] ; Coloca o valor de coluna auxiliar na pilha, para as recursões futuras não influenciarem nos valores da chamada atual da função
+        push word [coluna_destino] ; Coloca o valor de coluna destino na pilha, para as recursões futuras não influenciarem nos valores da chamada atual da função
         
-        mov ecx, colunas ; Armazenar string em ecx
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, movimento2 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        add ecx, 2
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
-        call printar_ecx ; Printar o que está em ecx
-        
-        jmp fim ; Ir para o final da função
-        
-    mais_discos_0: ; Caso tenha mais de um disco
-        dec byte [quant_disc] ; Decrescimento na quantidade de discos
-        
-        push word [quant_disc] ; Coloca o valor da quantidade atual de discos na pilha, para a primeira recursão e suas "filhas" não interferirem na próxima
-        mov esi, 1 ; Decidindo qual a configuração da próxima recursão, a lógica desta primeira recursão de "mais_discos" é sempre trocar a coluna do meio pela última
+        ; Trocando o valor da coluna auxiliar com o valor da coluna de destino
+        mov dx, [coluna_auxiliar] ; Armazena o valor da coluna auxiliar no registrador dx
+        mov cx, [coluna_destino] ; Armazena o valor da coluna destino no registrador cx
+        mov [coluna_destino], dx ; Move o valor de dx(coluna auxiliar) para a coluna destino
+        mov [coluna_auxiliar], cx ; Move o valor de cx(coluna destino) para a coluna auxiliar
         call towerofhanoi ; Recursão
         
-        mov ecx, movimento1 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
+        pop word [coluna_destino] ; Obtém o valor de coluna destino na pilha, para as recursões passadas não influenciarem nos valores da chamada atual da função
+        pop word [coluna_auxiliar] ; Obtém o valor de coluna auxiliar na pilha, para as recursões passadas não influenciarem nos valores da chamada atual da função
+        pop word [coluna_origem] ; Obtém o valor de coluna origem na pilha, para as recursões passadas não influenciarem nos valores da chamada atual da função
         
-        mov ecx, colunas ; Armazenar string em ecx
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, movimento2 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        add ecx, 2
-        call printar_ecx ; Printar o que está em ecx 
-        
-        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
-        call printar_ecx ; Printar o que está em ecx
-    
         pop word [quant_disc] ; Obtém o valor guardado na pilha, para que as recursões anteriores não interfiram na recursão abaixo
-        mov esi, 2 ; Decidindo qual a configuração da próxima recursão, a lógica desta segunda recursão de "mais_discos" é sempre trocar a coluna do meio pela primeira
-        call towerofhanoi ; Recursão
-        
-        jmp fim ; Ir para o final da função
-        
-    disco_unico_1: ; Caso tenha 1 disco apenas
-        mov ecx, movimento1 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, movimento2 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        inc ecx
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
-        call printar_ecx ; Printar o que está em ecx
-        
-        jmp fim ; Ir para o final da função
-        
-    mais_discos_1: ; Caso tenha mais de um disco
-        dec byte [quant_disc] ; Decrescimento na quantidade de discos
-        
-        push word [quant_disc] ; Coloca o valor da quantidade atual de discos na pilha, para a primeira recursão e suas "filhas" não interferirem na próxima
-        mov esi, 0 ; Decidindo qual a configuração da próxima recursão, a lógica desta primeira recursão de "mais_discos" é sempre trocar a coluna do meio pela última
-        call towerofhanoi ; Recursão
         
         mov ecx, movimento1 ; Armazenar string em ecx
         call printar_ecx_0 ; Printar o que está em ecx
         
-        mov ecx, colunas ; Armazenar string em ecx
-        call printar_ecx ; Printar o que está em ecx
+        mov ecx, coluna_origem ; Move o valor da coluna origem para ecx
+        call printar_ecx_0 ; Printar o que está em ecx
         
         mov ecx, movimento2 ; Armazenar string em ecx
         call printar_ecx_0 ; Printar o que está em ecx
         
-        mov ecx, colunas ; Armazenar string em ecx
-        inc ecx
-        call printar_ecx ; Printar o que está em ecx 
-        
-        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
-        call printar_ecx ; Printar o que está em ecx
-    
-        pop word [quant_disc] ; Obtém o valor guardado na pilha, para que as recursões anteriores não interfiram na recursão abaixo
-        mov esi, 4 ; Decidindo qual a configuração da próxima recursão, a lógica desta segunda recursão de "mais_discos" é sempre trocar a coluna do meio pela primeira
-        call towerofhanoi ; Recursão
-        
-        jmp fim ; Ir para o final da função
-        
-    disco_unico_2: ; Caso tenha 1 disco apenas
-        mov ecx, movimento1 ; Armazenar string em ecx
+        mov ecx, coluna_destino ; Move o valor da destino origem para ecx
         call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        inc ecx
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, movimento2 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        add ecx, 2
-        call printar_ecx ; Printar o que está em ecx
         
         mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
         call printar_ecx ; Printar o que está em ecx
         
-        jmp fim ; Ir para o final da função
-        
-    mais_discos_2: ; Caso tenha mais de um disco
-        dec byte [quant_disc] ; Decrescimento na quantidade de discos
-        
-        push word [quant_disc] ; Coloca o valor da quantidade atual de discos na pilha, para a primeira recursão e suas "filhas" não interferirem na próxima
-        mov esi, 3 ; Decidindo qual a configuração da próxima recursão, a lógica desta primeira recursão de "mais_discos" é sempre trocar a coluna do meio pela última
+        ; Trocando o valor da coluna auxiliar com o valor da coluna de origem
+        mov dx, [coluna_auxiliar] ; Armazena o valor da coluna auxiliar no registrador dx
+        mov cx, [coluna_origem] ; Armazena o valor da coluna origem no registrador cx
+        mov [coluna_origem], dx ; Move o valor de cx(coluna origem) para a coluna auxiliar
+        mov [coluna_auxiliar], cx ; Move o valor de cx(coluna auxiliar) para a coluna origem
         call towerofhanoi ; Recursão
-        
-        mov ecx, movimento1 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        inc ecx
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, movimento2 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        add ecx, 2
-        call printar_ecx ; Printar o que está em ecx 
-        
-        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
-        call printar_ecx ; Printar o que está em ecx
-    
-        pop word [quant_disc] ; Obtém o valor guardado na pilha, para que as recursões anteriores não interfiram na recursão abaixo
-        mov esi, 0 ; Decidindo qual a configuração da próxima recursão, a lógica desta segunda recursão de "mais_discos" é sempre trocar a coluna do meio pela primeira
-        call towerofhanoi ; Recursão
-        
-        jmp fim ; Ir para o final da função
-        
-    disco_unico_3: ; Caso tenha 1 disco apenas
-        mov ecx, movimento1 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        inc ecx
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, movimento2 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
-        call printar_ecx ; Printar o que está em ecx
-        
-        jmp fim ; Ir para o final da função
-        
-    mais_discos_3: ; Caso tenha mais de um disco
-        dec byte [quant_disc] ; Decrescimento na quantidade de discos
-        
-        push word [quant_disc] ; Coloca o valor da quantidade atual de discos na pilha, para a primeira recursão e suas "filhas" não interferirem na próxima
-        mov esi, 2 ; Decidindo qual a configuração da próxima recursão, a lógica desta primeira recursão de "mais_discos" é sempre trocar a coluna do meio pela última
-        call towerofhanoi ; Recursão
-        
-        mov ecx, movimento1 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        inc ecx
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, movimento2 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        call printar_ecx ; Printar o que está em ecx 
-        
-        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
-        call printar_ecx ; Printar o que está em ecx
-    
-        pop word [quant_disc] ; Obtém o valor guardado na pilha, para que as recursões anteriores não interfiram na recursão abaixo
-        mov esi, 5 ; Decidindo qual a configuração da próxima recursão, a lógica desta segunda recursão de "mais_discos" é sempre trocar a coluna do meio pela primeira
-        call towerofhanoi ; Recursão
-        
-        jmp fim ; Ir para o final da função
-        
-    disco_unico_4: ; Caso tenha 1 disco apenas
-        mov ecx, movimento1 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        add ecx, 2
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, movimento2 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        inc ecx
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
-        call printar_ecx ; Printar o que está em ecx
-        
-        jmp fim ; Ir para o final da função
-        
-    mais_discos_4: ; Caso tenha mais de um disco
-        dec byte [quant_disc] ; Decrescimento na quantidade de discos
-        
-        push word [quant_disc] ; Coloca o valor da quantidade atual de discos na pilha, para a primeira recursão e suas "filhas" não interferirem na próxima
-        mov esi, 5 ; Decidindo qual a configuração da próxima recursão, a lógica desta primeira recursão de "mais_discos" é sempre trocar a coluna do meio pela última
-        call towerofhanoi ; Recursão
-        
-        mov ecx, movimento1 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        add ecx, 2
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, movimento2 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        inc ecx
-        call printar_ecx ; Printar o que está em ecx 
-        
-        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
-        call printar_ecx ; Printar o que está em ecx
-    
-        pop word [quant_disc] ; Obtém o valor guardado na pilha, para que as recursões anteriores não interfiram na recursão abaixo
-        mov esi, 1 ; Decidindo qual a configuração da próxima recursão, a lógica desta segunda recursão de "mais_discos" é sempre trocar a coluna do meio pela primeira
-        call towerofhanoi ; Recursão
-        
-        jmp fim ; Ir para o final da função
-        
-    disco_unico_5: ; Caso tenha 1 disco apenas
-        mov ecx, movimento1 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        add ecx, 2
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, movimento2 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
-        call printar_ecx ; Printar o que está em ecx
-        
-        jmp fim ; Ir para o final da função
-        
-    mais_discos_5: ; Caso tenha mais de um disco
-        dec byte [quant_disc] ; Decrescimento na quantidade de discos
-        
-        push word [quant_disc] ; Coloca o valor da quantidade atual de discos na pilha, para a primeira recursão e suas "filhas" não interferirem na próxima
-        mov esi, 4 ; Decidindo qual a configuração da próxima recursão, a lógica desta primeira recursão de "mais_discos" é sempre trocar a coluna do meio pela última
-        call towerofhanoi ; Recursão
-        
-        mov ecx, movimento1 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        add ecx, 2
-        call printar_ecx ; Printar o que está em ecx
-        
-        mov ecx, movimento2 ; Armazenar string em ecx
-        call printar_ecx_0 ; Printar o que está em ecx
-        
-        mov ecx, colunas ; Armazenar string em ecx
-        call printar_ecx ; Printar o que está em ecx 
-        
-        mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
-        call printar_ecx ; Printar o que está em ecx
-    
-        pop word [quant_disc] ; Obtém o valor guardado na pilha, para que as recursões anteriores não interfiram na recursão abaixo
-        mov esi, 3 ; Decidindo qual a configuração da próxima recursão, a lógica desta segunda recursão de "mais_discos" é sempre trocar a coluna do meio pela primeira
-        call towerofhanoi ; Recursão
-        
-        jmp fim ; Ir para o final da função
     
     fim: ; Fim da função
         ret ; Retorno
 
-convert_string_to_int:
+convert_string_to_int: ; Conversão de 2 algarismos em formato de string para um número inteiro
     mov edx, entrada[0] ; Mover o primeiro caractere para o eax
     sub edx, '0' ; Transformar o caractere em algarismo inteiro
     mov eax, entrada[1] ; Mover o segundo caractere para o ebx
@@ -395,7 +126,7 @@ convert_string_to_int:
     
     um_algarismo:
     
-    ret
+    ret ; Retorno
 
 printar_ecx: ; Imprimir a string que está em ecx
     mov eax, 4               ; Número da chamada de sistema para imprimir
@@ -404,7 +135,7 @@ printar_ecx: ; Imprimir a string que está em ecx
     int 0x80                 ; Chamar a interrupção do sistema
     ret                      ; Retorno
         
-printar_ecx_0:          ; Imprimir caractere por caractere (só deve ser usado se a string terminar com um 0 inteiro)
+printar_ecx_0:  ; Imprimir caractere por caractere de uma string(só deve ser usado se a string terminar com um 0 inteiro)
     printar_loop:
         mov al, ecx[0]           ; Carregar o caractere atual
         cmp al, 0               ; Verificar se é o final da string
@@ -426,7 +157,7 @@ ler_3_2:             ; Ler a string do usuário que terá 3 bytes, mas só serã
     int 0x80            ; Chamando Kernel 
     ret                 ; Retorno
     
-avaliar_entrada:     ; Verificar se a entrada é um número de até 2 algarismos maior que 0 (ainda em string)
+avaliar_entrada: ; Verificar se a entrada é um número de até 2 algarismos maior que 0 (ainda em string)
     mov cl, entrada[2] ; Move o terceiro caractere da entrada para o registrador cl
     cmp cl, 0x0a ; Compara este caractere com o valor de newline da tabela ASCII
     
@@ -455,7 +186,7 @@ avaliar_entrada:     ; Verificar se a entrada é um número de até 2 algarismos
     um_algarismo_validacao:
     
     jmp valido ; Pula o tratamento de invalidez, porque se a execução chegou nesta linha, então a entrada é válida
-    invalido: 
+    invalido: ; Casos em que a entrada é inválida
         mov ecx, entrada_invalida ; Move o conteúdo da string entrada_invalida para ecx
         call printar_ecx_0 ; Chama a função para printar o conteúdo de ecx, desde que a string seja finalizada com um número inteiro 0
         mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
@@ -463,5 +194,5 @@ avaliar_entrada:     ; Verificar se a entrada é um número de até 2 algarismos
         
         jmp inicio ; Pula para o começo do código, onde o usuário terá que digitar uma nova entrada, já que sua última entrada foi inválida
     
-    valido: 
+    valido: ; Casos em que a entrada é válida
         ret ; Retorno
