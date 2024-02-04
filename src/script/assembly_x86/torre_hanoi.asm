@@ -1,7 +1,8 @@
 section .data
     ; Strings que poderão ser usadas no código posteriormente
     pergunta db 'Digite a quantidade de discos (1 a 99):', 0
-    movimento1 db 'Moveu um disco da coluna ', 0
+    movimento1 db 'Moveu o disco ', 0
+    movimento3 db ' da coluna ', 0
     movimento2 db ' até a coluna ', 0
     concluido db 'Concluído!', 0
     entrada_invalida db 'Sua entrada é inválida, digite novamente.', 0
@@ -14,6 +15,7 @@ section .data
 section .bss
     entrada resb 3  ; Buffer para armazenar a entrada do usuário (um ou dois dígitos + newline)
     quant_disc resb 1 ; Armazenamento do número de discos
+    len_buffer resb 16
 
 section .text
     global _start
@@ -21,7 +23,7 @@ section .text
 _start:
     inicio:
     mov ecx, pergunta ; Movendo a string para ecx
-    call printar_ecx_0 ; Printando o conteúdo de ecx, se for uma string
+    call printar_ecx_0 ; Printar a string que está em ecx, desde que a string seja terminado com um 0
     
     mov ecx, entrada ; Ponteiro para o buffer de entrada
     call ler_3_2 ; Leitura do input do usuário que terá 3 bytes, mas só serão lidos 2
@@ -34,8 +36,8 @@ _start:
     
     call towerofhanoi ; Função da torre de hanói
     
-    mov ecx, concluido ; Mensagem: Concluído!
-    call printar_ecx_0 ; Printar o que está em ecx, desde que a string seja terminado com um 0
+    mov ecx, concluido ; Move o conteúdo de concluido para ecx
+    call printar_ecx_0 ; Printar a string que está em ecx, desde que a string seja terminado com um 0
     
     ; Sair do programa
     mov eax, 1          ; Número da chamada de sistema para sair
@@ -51,13 +53,18 @@ towerofhanoi: ; Algoritmo da Torre de Hanói
         mov ecx, movimento1 ; Armazenar string em ecx
         call printar_ecx_0 ; Printar o que está em ecx
         
+        call chamar_print_n_discos
+        
+        mov ecx, movimento3 ; Armazenar string em ecx
+        call printar_ecx_0 ; Printar o que está em ecx
+        
         mov ecx, coluna_origem ; Move o valor da coluna origem para ecx
         call printar_ecx_0 ; Printar o que está em ecx
         
         mov ecx, movimento2 ; Armazenar string em ecx
         call printar_ecx_0 ; Printar o que está em ecx
         
-        mov ecx, coluna_destino ; Move o valor da coluna destino para ecx
+        mov ecx, coluna_destino ; Move o valor da destino origem para ecx
         call printar_ecx_0 ; Printar o que está em ecx
         
         mov ecx, newline ; Armazenar string em ecx, neste caso é uma quebra de linha
@@ -79,6 +86,7 @@ towerofhanoi: ; Algoritmo da Torre de Hanói
         mov cx, [coluna_destino] ; Armazena o valor da coluna destino no registrador cx
         mov [coluna_destino], dx ; Move o valor de dx(coluna auxiliar) para a coluna destino
         mov [coluna_auxiliar], cx ; Move o valor de cx(coluna destino) para a coluna auxiliar
+        
         call towerofhanoi ; Recursão
         
         pop word [coluna_destino] ; Obtém o valor de coluna destino na pilha, para as recursões passadas não influenciarem nos valores da chamada atual da função
@@ -88,6 +96,13 @@ towerofhanoi: ; Algoritmo da Torre de Hanói
         pop word [quant_disc] ; Obtém o valor guardado na pilha, para que as recursões anteriores não interfiram na recursão abaixo
         
         mov ecx, movimento1 ; Armazenar string em ecx
+        call printar_ecx_0 ; Printar o que está em ecx
+        
+        inc byte [quant_disc]
+        call chamar_print_n_discos
+        dec byte [quant_disc]
+        
+        mov ecx, movimento3 ; Armazenar string em ecx
         call printar_ecx_0 ; Printar o que está em ecx
         
         mov ecx, coluna_origem ; Move o valor da coluna origem para ecx
@@ -168,9 +183,9 @@ avaliar_entrada: ; Verificar se a entrada é um número de até 2 algarismos mai
     quantidade_caracteres_valida: ; Quantidade de caracteres válida
     
     mov al, entrada[0] ; Move o primeiro caractere da entrada para o registrador al
-    cmp al, 0x30 ; Compara este caractere com o valor na tabela ASCII do número 0 em formato de string 
+    cmp al, 0x30 ; Compara este caractere com o valor na tabela ASCII do número 0(decimal) em formato de string 
     jl invalido ; Se for menor, então significa que o que o usuário digitou não é um número, a entrada então será considerada inválida
-    cmp al, 0x39 ; Compara este caractere com o valor na tabela ASCII do número 9 em formato de string 
+    cmp al, 0x39 ; Compara este caractere com o valor na tabela ASCII do número 9(decimal) em formato de string 
     jg invalido ; Se for maior, então significa que o que o usuário digitou não é um número, a entrada então será considerada inválida
     
     mov dl, entrada[1] ; Move o segundo caractere da entrada para o registrador al
@@ -178,9 +193,9 @@ avaliar_entrada: ; Verificar se a entrada é um número de até 2 algarismos mai
     cmp dl, 0x0a ; Comparar este caractere com o valor de newline na tabela ASCII, para verificar se o segundo caractere é um algarismo ou se é um newline, newline esta que é gerada pelo "ENTER" do usuário ao ter digitado apenas um algarismo
     je um_algarismo_validacao ; Se o segundo caractere for newline, então só há um algarismo para analisar e não existe a necessidade de tratar um segundo caractere numérico 
     
-    cmp dl, 0x30 ; Compara este caractere com o valor na tabela ASCII do número 0 em formato de string
+    cmp dl, 0x30 ; Compara este caractere com o valor na tabela ASCII do número 0(decimal) em formato de string
     jl invalido ; Se for menor, então significa que o que o usuário digitou não é um número, a entrada então será considerada inválida
-    cmp dl, 0x39 ; Compara este caractere com o valor na tabela ASCII do número 9 em formato de string
+    cmp dl, 0x39 ; Compara este caractere com o valor na tabela ASCII do número 9(decimal) em formato de string
     jg invalido ; Se for maior, então significa que o que o usuário digitou não é um número, a entrada então será considerada inválida
     
     um_algarismo_validacao:
@@ -196,3 +211,29 @@ avaliar_entrada: ; Verificar se a entrada é um número de até 2 algarismos mai
     
     valido: ; Casos em que a entrada é válida
         ret ; Retorno
+
+chamar_print_n_discos:
+    movzx eax, byte [quant_disc]
+    lea edi, [len_buffer + 16]
+    call convert_int_to_str
+    ret
+
+convert_int_to_str:
+    dec edi
+    xor edx, edx
+    mov ecx, 10
+    div ecx
+    add dl, '0'
+    mov [edi], dl
+    test eax, eax
+    jnz convert_int_to_str
+
+    ; Write to console
+    mov eax, 4
+    mov ebx, 1
+    lea ecx, [edi]
+    lea edx, [len_buffer + 16]
+    sub edx, ecx
+    int 0x80
+
+    ret ; Retorno
