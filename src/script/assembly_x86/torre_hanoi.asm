@@ -180,7 +180,7 @@ avaliar_entrada: ; Verificar se a entrada é um número de até 2 algarismos mai
     quantidade_caracteres_valida: ; Quantidade de caracteres válida
     
     mov al, entrada[0] ; Move o primeiro caractere da entrada para o registrador al
-    cmp al, 0x30 ; Compara este caractere com o valor na tabela ASCII do número 0(decimal) em formato de string 
+    cmp al, 0x31 ; Compara este caractere com o valor na tabela ASCII do número 1(decimal) em formato de string 
     jl invalido ; Se for menor, então significa que o que o usuário digitou não é um número, a entrada então será considerada inválida
     cmp al, 0x39 ; Compara este caractere com o valor na tabela ASCII do número 9(decimal) em formato de string 
     jg invalido ; Se for maior, então significa que o que o usuário digitou não é um número, a entrada então será considerada inválida
