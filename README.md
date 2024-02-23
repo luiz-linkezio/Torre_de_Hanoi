@@ -64,7 +64,7 @@ No link https://www.mathsisfun.com/games/towerofhanoi.html, você pode jogar ou 
 <br>
 
 - NASM
-   - Sugestão de compilador online: http://www.tutorialspoint.com/compile_assembly_online.php
+    - Sugestão de compilador online: http://www.tutorialspoint.com/compile_assembly_online.php
     - Info do Assembly NASM: https://mentebinaria.gitbook.io/assembly/
     - Tutorial de Assembly NASM: https://www.tutorialspoint.com/assembly_programming/index.htm
 - TASM
