@@ -1,4 +1,4 @@
-# <div align= center>Torre de Hanói</div>
+# <div align= center>Torre de Hanói RAx86</div>
 <img src="https://res.cloudinary.com/devjoseronaldo/image/upload/v1707135065/Captura_de_tela_2024-02-05_091035_zwobdp.png" alt= banner width=100%>
 
 ## 💻 Projeto
