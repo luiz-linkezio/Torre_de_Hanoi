@@ -2,7 +2,7 @@
 <img src="https://res.cloudinary.com/devjoseronaldo/image/upload/v1707135065/Captura_de_tela_2024-02-05_091035_zwobdp.png" alt= banner width=100%>
 
 ## 💻 Projeto
-Projeto da disciplina ***Organização de Computadores e Sistemas Operacionais***, da graduação em [Sistemas de Informação (SI)](https://portal.cin.ufpe.br/graduacao/sistemas-de-informacao/) do [Centro de Informática (CIN)](https://portal.cin.ufpe.br/) da [Universidade Federal de Pernambuco (UFPE)](https://www.ufpe.br/), cursada em no letivo 2023.2.
+Projeto da disciplina ***Organização de Computadores e Sistemas Operacionais***, da graduação em [Sistemas de Informação (SI)](https://portal.cin.ufpe.br/graduacao/sistemas-de-informacao/) do [Centro de Informática (CIn)](https://portal.cin.ufpe.br/) da [Universidade Federal de Pernambuco (UFPE)](https://www.ufpe.br/), cursada em no letivo 2023.2.
 <br>
 
 O projeto consiste em fazer uma Torre de Hanói usando recursão em Assembly. A Torre de Hanói consiste em três hastes (pinos verticais) e um número de discos de tamanhos diferentes, empilhados em ordem decrescente de tamanho em uma haste, o objetivo é mover a pilha de discos de uma haste para outra seguindo algumas regras.
